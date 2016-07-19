@@ -1,0 +1,23 @@
+<manifest package="me.itangqi.module.photoview"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <application
+        android:name=".PhotoViewApp"
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+        <activity
+            android:name=".PhotoViewPagerActivity"
+            android:theme="@style/myTransparent"/>
+        <activity
+            android:name=".PhotoViewSingleActivity"
+            android:theme="@style/myTransparent"/>
+        <activity
+            android:name=".PermissionsActivity"/>
+    </application>
+
+</manifest>

@@ -1,0 +1,21 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/background_material_dark</item>
+        <item name="colorPrimaryDark">@color/background_material_dark</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
+
+    <style name="myTransparent" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item><!-- 半透明 -->
+        <item name="android:windowNoTitle">true</item><!-- 无标题 -->
+        <item name="android:backgroundDimAmount">0.8</item><!-- 灰度 -->
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item><!-- 背景缓存颜色 -->
+        <item name="android:backgroundDimEnabled">true</item><!-- 模糊 -->
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item><!-- 弹出或者进入时的动画效果 -->
+    </style>
+
+</resources>
