@@ -32,14 +32,16 @@ import me.relex.photodraweeview.PhotoDraweeView;
 
 public class PagerPhotoViewActivity extends AppCompatActivity {
     private static ArrayList<String> mPhotoList;
+    private static String mFolderName;
     private String mPhotoURL;
     private long mDownloadReference;
     private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
 
-    public static void startPhotoViewPager(Context context, ArrayList<String> arrayList) {
+    public static void startPhotoViewPager(Context context, ArrayList<String> arrayList, String folderName) {
         mPhotoList = arrayList;
+        mFolderName = folderName;
         Intent intent = new Intent(context, PagerPhotoViewActivity.class);
         context.startActivity(intent);
     }
@@ -149,11 +151,15 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
     }
 
     private void downloadImage() {
-        File appDir = new File(Environment.getExternalStorageDirectory(), "Huaban");
+        File appDir = new File(Environment.getExternalStorageDirectory(), mFolderName);
         if (!appDir.exists()) {
             if (appDir.mkdir()) {
                 downloadImageUseDownloadManager();
+            } else {
+                Toast.makeText(getApplicationContext(), R.string.photo_view_download_mkdir_failure, Toast.LENGTH_SHORT).show();
             }
+        } else {
+            downloadImageUseDownloadManager();
         }
     }
 
@@ -161,7 +167,7 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
         DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         Uri uri = Uri.parse(mPhotoURL);
         DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setDestinationInExternalPublicDir("Huaban", System.currentTimeMillis() + ".jpg");
+        request.setDestinationInExternalPublicDir(mFolderName, System.currentTimeMillis() + ".jpg");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         mDownloadReference = downloadManager.enqueue(request);
     }

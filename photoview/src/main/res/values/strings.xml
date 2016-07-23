@@ -2,6 +2,7 @@
     <string name="app_name">PhotoView</string>
     <string name="photo_view_download_success">保存成功</string>
     <string name="photo_view_download_failure">保存失败</string>
+    <string name="photo_view_download_mkdir_failure">好像出错了</string>
     <string name="photo_view_permission_denied">请开启文件读写权限</string>
     <string name="photo_view_permission_help_title">帮助</string>
     <string name="photo_view_permission_help_detail">当前应用缺少必要权限\n\n请点击\"设置\"-\"权限\"打开所需权限\n\n最后点击两次后退按钮，即可返回</string>

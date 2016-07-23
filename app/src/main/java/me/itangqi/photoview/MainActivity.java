@@ -12,30 +12,28 @@ import me.itangqi.module.photoview.PagerPhotoViewActivity;
 import me.itangqi.module.photoview.SinglePhotoViewActivity;
 
 public class MainActivity extends AppCompatActivity {
-    private Button mBtnViewSingle;
-    private Button mBtnViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mBtnViewSingle = (Button)findViewById(R.id.btn_single);
-        mBtnViewPager = (Button)findViewById(R.id.btn_pager);
+        Button mBtnViewSingle = (Button) findViewById(R.id.btn_single);
+        Button mBtnViewPager = (Button) findViewById(R.id.btn_pager);
         mBtnViewSingle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String photoViewURL = "http://ww2.sinaimg.cn/large/610dc034jw1f5z2eko5xnj20f00miq5s.jpg";
-                SinglePhotoViewActivity.startPhotoViewSingle(MainActivity.this, photoViewURL);
+                String photoViewURL = "http://img2.yytcdn.com/artist/fan/150812/0/-M-0e9a280baa1d87f73e7d91db57cffa22_0x0.jpg";
+                SinglePhotoViewActivity.startPhotoViewSingle(MainActivity.this, photoViewURL, "PhotoView");
             }
         });
         mBtnViewPager.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<String> photoViewURLArryList = new ArrayList(Arrays.asList("http://ww4.sinaimg.cn/large/610dc034jw1f5ufyzg2ajj20ck0kuq5e.jpg",
-                        "http://ww4.sinaimg.cn/large/610dc034jw1f5xwnxj2vmj20dw0dwjsc.jpg",
-                        "http://ww3.sinaimg.cn/large/610dc034jw1f5t889dhpoj20f00mi414.jpg",
-                        "http://ww2.sinaimg.cn/large/610dc034jw1f5s5382uokj20fk0ncmyt.jpg"));
-                PagerPhotoViewActivity.startPhotoViewPager(MainActivity.this, photoViewURLArryList);
+                ArrayList photoViewURLArrayList = new ArrayList(Arrays.asList("http://img2.yytcdn.com/artist/fan/150812/0/-M-0e9a280baa1d87f73e7d91db57cffa22_0x0.jpg",
+                        "http://himg2.huanqiu.com/attachment2010/2015/0407/10/15/20150407101555843.jpg",
+                        "http://img.cxdq.com/d1/img/081115/2008111514278263.jpg",
+                        "http://img01.sogoucdn.com/app/a/100540002/856602.jpg"));
+                PagerPhotoViewActivity.startPhotoViewPager(MainActivity.this, photoViewURLArrayList, "PhotoView");
             }
         });
     }
