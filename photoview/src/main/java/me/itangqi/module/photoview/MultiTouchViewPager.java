@@ -19,7 +19,7 @@ public class MultiTouchViewPager extends ViewPager {
     private boolean mIsDisallowIntercept = false;
 
     @Override
-    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept)  {
         mIsDisallowIntercept = disallowIntercept;
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
     }

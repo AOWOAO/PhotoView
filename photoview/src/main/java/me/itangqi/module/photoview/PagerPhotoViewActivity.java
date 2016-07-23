@@ -11,6 +11,7 @@ import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -29,59 +30,58 @@ import java.util.ArrayList;
 import me.relex.circleindicator.CircleIndicator;
 import me.relex.photodraweeview.PhotoDraweeView;
 
-public class PhotoViewPagerActivity extends AppCompatActivity {
-    private static ArrayList<String> mPinList;
-    private ImageView mImageViewSave;
-    private String mPinURL;
-    private long myDownloadReference;
-    private static final float MAXIMUM_SCALE = 5.0f;
+public class PagerPhotoViewActivity extends AppCompatActivity {
+    private static ArrayList<String> mPhotoList;
+    private String mPhotoURL;
+    private long mDownloadReference;
+    private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
 
-    public static void startPhotoViewPager(Context context, ArrayList<String> arryList) {
-        mPinList = arryList;
-        Intent intent = new Intent(context, PhotoViewPagerActivity.class);
+    public static void startPhotoViewPager(Context context, ArrayList<String> arrayList) {
+        mPhotoList = arrayList;
+        Intent intent = new Intent(context, PagerPhotoViewActivity.class);
         context.startActivity(intent);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_photo_view_pager);
-
+        setContentView(R.layout.activity_pager_photo_view);
+        // 初始化小圆点
         CircleIndicator indicator = (CircleIndicator) findViewById(R.id.indicator);
         final MultiTouchViewPager viewPager = (MultiTouchViewPager) findViewById(R.id.view_pager);
         viewPager.setAdapter(new DraweePagerAdapter());
         indicator.setViewPager(viewPager);
-
-        mImageViewSave = (ImageView) findViewById(R.id.iv_save);
+        // 初始化下载图标
+        ImageView mImageViewSave = (ImageView) findViewById(R.id.iv_save);
         mImageViewSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPinURL = mPinList.get(viewPager.getCurrentItem());
+                mPhotoURL = mPhotoList.get(viewPager.getCurrentItem());
                 startDownloadImage();
             }
         });
-
+        // 注册下载完成广播
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
 
         BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long reference = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                if (myDownloadReference == reference) {
-                    Toast.makeText(PhotoViewPagerActivity.this, R.string.photo_view_download_success, Toast.LENGTH_LONG).show();
+                if (mDownloadReference == reference) {
+                    Toast.makeText(PagerPhotoViewActivity.this, R.string.photo_view_download_success, Toast.LENGTH_SHORT).show();
                 }
             }
         };
         registerReceiver(receiver, filter);
     }
 
-    public class DraweePagerAdapter extends PagerAdapter {
+    private class DraweePagerAdapter extends PagerAdapter {
 
         @Override
         public int getCount() {
-            return mPinList.size();
+            return mPhotoList.size();
         }
 
         @Override
@@ -98,7 +98,7 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
         public Object instantiateItem(ViewGroup viewGroup, int position) {
             final PhotoDraweeView photoDraweeView = new PhotoDraweeView(viewGroup.getContext());
             PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
-            controller.setUri(Uri.parse(mPinList.get(position)));
+            controller.setUri(Uri.parse(mPhotoList.get(position)));
             controller.setOldController(photoDraweeView.getController());
             controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
                 @Override
@@ -127,20 +127,19 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
         PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // 拒绝时相应处理
         if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
-
+            // TODO
         } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
             downloadImage();
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             downloadImage();
@@ -152,19 +151,18 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
     private void downloadImage() {
         File appDir = new File(Environment.getExternalStorageDirectory(), "Huaban");
         if (!appDir.exists()) {
-            appDir.mkdir();
-            downloadImageUseDownloadManager();
-        } else {
-            downloadImageUseDownloadManager();
+            if (appDir.mkdir()) {
+                downloadImageUseDownloadManager();
+            }
         }
     }
 
     private void downloadImageUseDownloadManager() {
-        DownloadManager downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
-        Uri uri = Uri.parse(mPinURL);
+        DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        Uri uri = Uri.parse(mPhotoURL);
         DownloadManager.Request request = new DownloadManager.Request(uri);
         request.setDestinationInExternalPublicDir("Huaban", System.currentTimeMillis() + ".jpg");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        myDownloadReference = downloadManager.enqueue(request);
+        mDownloadReference = downloadManager.enqueue(request);
     }
 }

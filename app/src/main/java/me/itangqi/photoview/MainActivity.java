@@ -8,8 +8,8 @@ import android.widget.Button;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import me.itangqi.module.photoview.PhotoViewPagerActivity;
-import me.itangqi.module.photoview.PhotoViewSingleActivity;
+import me.itangqi.module.photoview.PagerPhotoViewActivity;
+import me.itangqi.module.photoview.SinglePhotoViewActivity;
 
 public class MainActivity extends AppCompatActivity {
     private Button mBtnViewSingle;
@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String photoViewURL = "http://ww2.sinaimg.cn/large/610dc034jw1f5z2eko5xnj20f00miq5s.jpg";
-                PhotoViewSingleActivity.startPhotoViewSingle(MainActivity.this, photoViewURL);
+                SinglePhotoViewActivity.startPhotoViewSingle(MainActivity.this, photoViewURL);
             }
         });
         mBtnViewPager.setOnClickListener(new View.OnClickListener() {
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
                         "http://ww4.sinaimg.cn/large/610dc034jw1f5xwnxj2vmj20dw0dwjsc.jpg",
                         "http://ww3.sinaimg.cn/large/610dc034jw1f5t889dhpoj20f00mi414.jpg",
                         "http://ww2.sinaimg.cn/large/610dc034jw1f5s5382uokj20fk0ncmyt.jpg"));
-                PhotoViewPagerActivity.startPhotoViewPager(MainActivity.this, photoViewURLArryList);
+                PagerPhotoViewActivity.startPhotoViewPager(MainActivity.this, photoViewURLArryList);
             }
         });
     }

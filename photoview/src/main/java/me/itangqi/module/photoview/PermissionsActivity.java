@@ -15,23 +15,22 @@ import android.support.v7.app.AppCompatActivity;
 
 /**
  * 权限获取页面
- * <p/>
  * Created by wangchenlong on 16/1/26.
  */
 public class PermissionsActivity extends AppCompatActivity {
 
-    public static final int PERMISSIONS_GRANTED = 0; // 权限授权
-    public static final int PERMISSIONS_DENIED = 1; // 权限拒绝
+    static final int PERMISSIONS_GRANTED = 0; // 权限授权
+    static final int PERMISSIONS_DENIED = 1; // 权限拒绝
 
     private static final int PERMISSION_REQUEST_CODE = 0; // 系统权限管理页面的参数
-    private static final String EXTRA_PERMISSIONS = "com.huaban.android.extra_permission"; // 权限参数
+    private static final String EXTRA_PERMISSIONS = "me.itangqi.android.extra_permission"; // 权限参数
     private static final String PACKAGE_URL_SCHEME = "package:"; // 方案
 
     private PermissionsChecker mChecker; // 权限检测器
-    private boolean isRequireCheck; // 是否需要系统权限检测
+    private boolean isRequiredCheck; // 是否需要系统权限检测
 
     // 启动当前权限页面的公开接口
-    public static void startActivityForResult(Activity activity, int requestCode, String... permissions) {
+    static void startActivityForResult(Activity activity, int requestCode, String... permissions) {
         Intent intent = new Intent(activity, PermissionsActivity.class);
         intent.putExtra(EXTRA_PERMISSIONS, permissions);
         ActivityCompat.startActivityForResult(activity, intent, requestCode, null);
@@ -45,21 +44,21 @@ public class PermissionsActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_main);
         mChecker = new PermissionsChecker(this);
-        isRequireCheck = true;
+        isRequiredCheck = true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (isRequireCheck) {
+        if (isRequiredCheck) {
             String[] permissions = getPermissions();
-            if (mChecker.islackedPermissions(permissions)) {
+            if (mChecker.isLackedPermissions(permissions)) {
                 requestPermissions(permissions); // 请求权限
             } else {
                 allPermissionsGranted(); // 全部权限都已获取
             }
         } else {
-            isRequireCheck = true;
+            isRequiredCheck = true;
         }
     }
 
@@ -91,10 +90,10 @@ public class PermissionsActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_REQUEST_CODE && hasAllPermissionsGranted(grantResults)) {
-            isRequireCheck = true;
+            isRequiredCheck = true;
             allPermissionsGranted();
         } else {
-            isRequireCheck = false;
+            isRequiredCheck = false;
             showMissingPermissionDialog();
         }
     }

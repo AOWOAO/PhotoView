@@ -1,24 +1,20 @@
 package me.itangqi.module.photoview;
 
-/**
- * Created by tangqi on 7/18/16.
- */
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.v4.content.ContextCompat;
 
-public class PermissionsChecker {
+class PermissionsChecker {
     private final Context mContext;
 
-    public PermissionsChecker(Context context) {
+    PermissionsChecker(Context context) {
         mContext = context.getApplicationContext();
     }
 
     // 判断权限集合
-    public boolean islackedPermissions(String... permissions) {
+    boolean isLackedPermissions(String... permissions) {
         for (String permission : permissions) {
-            if (islackedPermission(permission)) {
+            if (isLackedPermission(permission)) {
                 return true;
             }
         }
@@ -26,7 +22,7 @@ public class PermissionsChecker {
     }
 
     // 判断是否缺少权限
-    private boolean islackedPermission(String permission) {
+    private boolean isLackedPermission(String permission) {
         return ContextCompat.checkSelfPermission(mContext, permission) ==
                 PackageManager.PERMISSION_DENIED;
     }

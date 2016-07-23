@@ -11,6 +11,7 @@ import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
@@ -25,33 +26,31 @@ import java.io.File;
 
 import me.relex.photodraweeview.PhotoDraweeView;
 
-public class PhotoViewSingleActivity extends AppCompatActivity {
+public class SinglePhotoViewActivity extends AppCompatActivity {
 
     private PhotoDraweeView mPhotoDraweeView;
-    private ImageView mImageViewSave;
-    private static final float MAXIMUM_SCALE = 5.0f;
+    private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
-    private static String mPinURL;
-    private long myDownloadReference;
+    private static String mPhotoURL;
+    private long mDownloadReference;
 
-    public static void startPhotoViewSingle(Context context, String pinURL) {
-        mPinURL = pinURL;
-        Intent intent = new Intent(context, PhotoViewSingleActivity.class);
+    public static void startPhotoViewSingle(Context context, String photoURL) {
+        mPhotoURL = photoURL;
+        Intent intent = new Intent(context, SinglePhotoViewActivity.class);
         context.startActivity(intent);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_photo_view_single);
+        setContentView(R.layout.activity_single_photo_view);
 
         mPhotoDraweeView = (PhotoDraweeView) findViewById(R.id.photo_drawee_view);
         mPhotoDraweeView.setMaximumScale(MAXIMUM_SCALE);
         PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
-        controller.setUri(Uri.parse(mPinURL));
+        controller.setUri(Uri.parse(mPhotoURL));
         controller.setOldController(mPhotoDraweeView.getController());
-        // You need setControllerListener
         controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
             @Override
             public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
@@ -64,7 +63,7 @@ public class PhotoViewSingleActivity extends AppCompatActivity {
         });
         mPhotoDraweeView.setController(controller.build());
 
-        mImageViewSave = (ImageView) findViewById(R.id.iv_save);
+        ImageView mImageViewSave = (ImageView) findViewById(R.id.iv_save);
         mImageViewSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -77,8 +76,8 @@ public class PhotoViewSingleActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long reference = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                if (myDownloadReference == reference) {
-                    Toast.makeText(PhotoViewSingleActivity.this, R.string.photo_view_download_success, Toast.LENGTH_LONG).show();
+                if (mDownloadReference == reference) {
+                    Toast.makeText(SinglePhotoViewActivity.this, R.string.photo_view_download_success, Toast.LENGTH_LONG).show();
                 }
             }
         };
@@ -95,14 +94,14 @@ public class PhotoViewSingleActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         // 拒绝时相应处理
         if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
-
+            // TODO
         } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
             downloadImage();
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             downloadImage();
@@ -114,20 +113,19 @@ public class PhotoViewSingleActivity extends AppCompatActivity {
     private void downloadImage() {
         File appDir = new File(Environment.getExternalStorageDirectory(), "Huaban");
         if (!appDir.exists()) {
-            appDir.mkdir();
-            downloadImageUseDownloadManager();
-        } else {
-            downloadImageUseDownloadManager();
+            if (appDir.mkdir()) {
+                downloadImageUseDownloadManager();
+            }
         }
     }
 
     private void downloadImageUseDownloadManager() {
-        DownloadManager downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
-        Uri uri = Uri.parse(mPinURL);
+        DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        Uri uri = Uri.parse(mPhotoURL);
         DownloadManager.Request request = new DownloadManager.Request(uri);
         request.setDestinationInExternalPublicDir("Huaban", System.currentTimeMillis() + ".jpg");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        myDownloadReference = downloadManager.enqueue(request);
+        mDownloadReference = downloadManager.enqueue(request);
     }
 }
 

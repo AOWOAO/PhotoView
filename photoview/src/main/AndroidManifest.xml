@@ -11,10 +11,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true">
         <activity
-            android:name=".PhotoViewPagerActivity"
+            android:name=".PagerPhotoViewActivity"
             android:theme="@style/myTransparent"/>
         <activity
-            android:name=".PhotoViewSingleActivity"
+            android:name=".SinglePhotoViewActivity"
             android:theme="@style/myTransparent"/>
         <activity
             android:name=".PermissionsActivity"/>
