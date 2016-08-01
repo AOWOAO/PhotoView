@@ -39,7 +39,7 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
 
-    public static void startPhotoViewPager(Context context, ArrayList<String> arrayList, String folderName) {
+    public static void startPagerPhotoView(Context context, ArrayList<String> arrayList, String folderName) {
         mPhotoList = arrayList;
         mFolderName = folderName;
         Intent intent = new Intent(context, PagerPhotoViewActivity.class);

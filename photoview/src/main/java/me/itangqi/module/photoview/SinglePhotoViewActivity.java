@@ -24,6 +24,7 @@ import com.facebook.imagepipeline.image.ImageInfo;
 
 import java.io.File;
 
+import me.relex.photodraweeview.OnPhotoTapListener;
 import me.relex.photodraweeview.PhotoDraweeView;
 
 public class SinglePhotoViewActivity extends AppCompatActivity {
@@ -36,7 +37,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private static String mFolderName;
     private long mDownloadReference;
 
-    public static void startPhotoViewSingle(Context context, String photoURL, String folderName) {
+    public static void startSinglePhotoView(Context context, String photoURL, String folderName) {
         mPhotoURL = photoURL;
         mFolderName = folderName;
         Intent intent = new Intent(context, SinglePhotoViewActivity.class);
@@ -64,6 +65,12 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
             }
         });
         mPhotoDraweeView.setController(controller.build());
+        mPhotoDraweeView.setOnPhotoTapListener(new OnPhotoTapListener() {
+            @Override
+            public void onPhotoTap(View view, float x, float y) {
+                finish();
+            }
+        });
 
         ImageView mImageViewSave = (ImageView) findViewById(R.id.iv_save);
         mImageViewSave.setOnClickListener(new View.OnClickListener() {
