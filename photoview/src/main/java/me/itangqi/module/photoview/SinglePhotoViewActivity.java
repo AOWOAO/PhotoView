@@ -36,6 +36,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private static String mPhotoURL;
     private static String mFolderName;
     private long mDownloadReference;
+    private BroadcastReceiver receiver;
 
     public static void startSinglePhotoView(Context context, String photoURL, String folderName) {
         mPhotoURL = photoURL;
@@ -81,7 +82,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         });
 
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long reference = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
@@ -139,6 +140,12 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         request.setDestinationInExternalPublicDir(mFolderName, System.currentTimeMillis() + ".jpg");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         mDownloadReference = downloadManager.enqueue(request);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 }
 

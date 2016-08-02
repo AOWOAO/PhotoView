@@ -35,6 +35,7 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
     private static String mFolderName;
     private String mPhotoURL;
     private long mDownloadReference;
+    private BroadcastReceiver receiver;
     private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
@@ -67,7 +68,7 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
         // 注册下载完成广播
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
 
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long reference = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
@@ -170,5 +171,11 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
         request.setDestinationInExternalPublicDir(mFolderName, System.currentTimeMillis() + ".jpg");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         mDownloadReference = downloadManager.enqueue(request);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 }
