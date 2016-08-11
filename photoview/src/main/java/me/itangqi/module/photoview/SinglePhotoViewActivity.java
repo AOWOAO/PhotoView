@@ -1,6 +1,7 @@
 package me.itangqi.module.photoview;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -25,6 +27,7 @@ import com.facebook.imagepipeline.image.ImageInfo;
 import java.io.File;
 
 import me.relex.photodraweeview.OnPhotoTapListener;
+import me.relex.photodraweeview.OnViewTapListener;
 import me.relex.photodraweeview.PhotoDraweeView;
 
 public class SinglePhotoViewActivity extends AppCompatActivity {
@@ -38,11 +41,12 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private long mDownloadReference;
     private BroadcastReceiver receiver;
 
-    public static void startSinglePhotoView(Context context, String photoURL, String folderName) {
+    public static void startSinglePhotoView(Activity activity, String photoURL, String folderName) {
         mPhotoURL = photoURL;
         mFolderName = folderName;
-        Intent intent = new Intent(context, SinglePhotoViewActivity.class);
-        context.startActivity(intent);
+        Intent intent = new Intent(activity, SinglePhotoViewActivity.class);
+        activity.startActivity(intent);
+        activity.overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
     @Override
@@ -66,10 +70,12 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
             }
         });
         mPhotoDraweeView.setController(controller.build());
-        mPhotoDraweeView.setOnPhotoTapListener(new OnPhotoTapListener() {
+        mPhotoDraweeView.setOnViewTapListener(new OnViewTapListener() {
+
             @Override
-            public void onPhotoTap(View view, float x, float y) {
+            public void onViewTap(View view, float x, float y) {
                 finish();
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
 
@@ -97,7 +103,6 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private void startDownloadImage() {
         PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -147,6 +152,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         super.onDestroy();
         unregisterReceiver(receiver);
     }
+
 }
 
 

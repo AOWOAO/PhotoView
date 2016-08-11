@@ -15,7 +15,7 @@
         <item name="android:windowBackground">@color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item><!-- 背景缓存颜色 -->
         <item name="android:backgroundDimEnabled">true</item><!-- 模糊 -->
-        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item><!-- 弹出或者进入时的动画效果 -->
+        <!--<item name="android:windowAnimationStyle">@style/photoViewAnim</item>&lt;!&ndash; 弹出或者进入时的动画效果 &ndash;&gt;-->
     </style>
 
 </resources>
