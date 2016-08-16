@@ -8,7 +8,7 @@
     </style>
 
 
-    <style name="myTransparent" parent="Theme.AppCompat.NoActionBar">
+    <style name="Transparent" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowIsTranslucent">true</item><!-- 半透明 -->
         <item name="android:windowNoTitle">true</item><!-- 无标题 -->
         <item name="android:backgroundDimAmount">0.8</item><!-- 灰度 -->

@@ -137,7 +137,7 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
             // TODO
         } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            downloadImage();
+            downloadImageUseDownloadManager();
         }
     }
 
@@ -145,22 +145,9 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            downloadImage();
+            downloadImageUseDownloadManager();
         } else {
             Toast.makeText(getApplicationContext(), R.string.photo_view_permission_denied, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void downloadImage() {
-        File appDir = new File(Environment.getExternalStorageDirectory(), mFolderName);
-        if (!appDir.exists()) {
-            if (appDir.mkdir()) {
-                downloadImageUseDownloadManager();
-            } else {
-                Toast.makeText(getApplicationContext(), R.string.photo_view_download_mkdir_failure, Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            downloadImageUseDownloadManager();
         }
     }
 

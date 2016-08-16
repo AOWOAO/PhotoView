@@ -12,12 +12,13 @@
         android:supportsRtl="true">
         <activity
             android:name=".PagerPhotoViewActivity"
-            android:theme="@style/myTransparent"/>
+            android:theme="@style/Transparent"/>
         <activity
             android:name=".SinglePhotoViewActivity"
-            android:theme="@style/myTransparent"/>
+            android:theme="@style/Transparent"/>
         <activity
             android:name=".PermissionsActivity"/>
+
     </application>
 
 </manifest>

@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -101,7 +102,12 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     }
 
     private void startDownloadImage() {
-        PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
+        if ((ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_DENIED)) {
+            PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
+        } else {
+            downloadImageUseDownloadManager();
+        }
     }
 
     @Override
@@ -111,7 +117,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
             // TODO
         } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            downloadImage();
+            downloadImageUseDownloadManager();
         }
     }
 
@@ -119,22 +125,9 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            downloadImage();
+            downloadImageUseDownloadManager();
         } else {
             Toast.makeText(getApplicationContext(), R.string.photo_view_permission_denied, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void downloadImage() {
-        File appDir = new File(Environment.getExternalStorageDirectory(), mFolderName);
-        if (!appDir.exists()) {
-            if (appDir.mkdir()) {
-                downloadImageUseDownloadManager();
-            } else {
-                Toast.makeText(getApplicationContext(), R.string.photo_view_download_mkdir_failure, Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            downloadImageUseDownloadManager();
         }
     }
 
