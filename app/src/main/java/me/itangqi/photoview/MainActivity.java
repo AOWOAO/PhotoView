@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String photoViewURL = "http://img2.yytcdn.com/artist/fan/150812/0/-M-0e9a280baa1d87f73e7d91db57cffa22_0x0.jpg";
                 // 跳转 Single view
-                SinglePhotoViewActivity.startSinglePhotoView(MainActivity.this, photoViewURL, "PhotoView");
+                SinglePhotoViewActivity.startSinglePhotoView(MainActivity.this, photoViewURL, System.currentTimeMillis() + ".jpg", "PhotoView");
             }
         });
         mBtnViewPager.setOnClickListener(new View.OnClickListener() {

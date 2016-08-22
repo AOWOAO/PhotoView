@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,13 +20,20 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.facebook.binaryresource.BinaryResource;
+import com.facebook.binaryresource.FileBinaryResource;
+import com.facebook.cache.common.CacheKey;
 import com.facebook.common.executors.CallerThreadExecutor;
 import com.facebook.common.references.CloseableReference;
 import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.imageformat.ImageFormat;
+import com.facebook.imageformat.ImageFormatChecker;
+import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
 import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
 import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.image.ImageInfo;
@@ -33,6 +41,8 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -46,12 +56,13 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
     private static String mPhotoURL;
+    private static String mFileName;
     private static String mFolderName;
-    private BroadcastReceiver receiver;
-    private static final String ACTION_DOWNLOAD_COMPLETE = "0x123";
 
-    public static void startSinglePhotoView(Activity activity, String photoURL, String folderName) {
+
+    public static void startSinglePhotoView(Activity activity, String photoURL, String fileName, String folderName) {
         mPhotoURL = photoURL;
+        mFileName = fileName;
         mFolderName = folderName;
         Intent intent = new Intent(activity, SinglePhotoViewActivity.class);
         activity.startActivity(intent);
@@ -92,26 +103,17 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         mImageViewSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startDownloadImage();
+                startDownloadImage(mPhotoURL, mFileName, mFolderName);
             }
         });
-
-        IntentFilter filter = new IntentFilter(ACTION_DOWNLOAD_COMPLETE);
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Toast.makeText(SinglePhotoViewActivity.this, R.string.photo_view_download_success, Toast.LENGTH_SHORT).show();
-            }
-        };
-        registerReceiver(receiver, filter);
     }
 
-    private void startDownloadImage() {
+    private void startDownloadImage(String photoURL, String fileName, String folderName) {
         if ((ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_DENIED)) {
             PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
         } else {
-            downloadImage(this, mFolderName, mPhotoURL);
+            downloadImage(photoURL, fileName, folderName);
         }
     }
 
@@ -122,7 +124,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
             // TODO
         } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            downloadImage(this, mFolderName, mPhotoURL);
+            downloadImage(mPhotoURL, mFileName, mFolderName);
         }
     }
 
@@ -130,63 +132,18 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            downloadImage(this, mFolderName, mPhotoURL);
+            downloadImage(mPhotoURL, mFileName, mFolderName);
         } else {
             Toast.makeText(getApplicationContext(), R.string.photo_view_permission_denied, Toast.LENGTH_SHORT).show();
         }
     }
 
-    public static void downloadImage(final Context context, String folderName, String photoURL) {
-        File appDir = new File(Environment.getExternalStorageDirectory(), folderName);
-        if (!appDir.exists()) {
-            appDir.mkdir();
-        }
-        String fileName = System.currentTimeMillis() + ".jpg";
-        final File file = new File(appDir, fileName);
-        // To get image using Fresco
-        ImageRequest imageRequest = ImageRequestBuilder
-                .newBuilderWithSource(Uri.parse(photoURL))
-                .setProgressiveRenderingEnabled(true)
-                .build();
-
-        ImagePipeline imagePipeline = Fresco.getImagePipeline();
-        DataSource<CloseableReference<CloseableImage>> dataSource =
-                imagePipeline.fetchDecodedImage(imageRequest, context);
-
-        dataSource.subscribe(new BaseBitmapDataSubscriber() {
-
-            @Override
-            protected void onNewResultImpl(Bitmap bitmap) {
-                try {
-                    FileOutputStream outputStream = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                    outputStream.flush();
-                    outputStream.close();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                // 下载完成更新
-                Intent completedIntent = new Intent(ACTION_DOWNLOAD_COMPLETE);
-                context.sendBroadcast(completedIntent);
-                // 通知图库更新
-                Intent scannerIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file));
-                context.sendBroadcast(scannerIntent);
-            }
-
-            @Override
-            public void onFailureImpl(DataSource dataSource) {
-                // No cleanup required here.
-            }
-
-        }, CallerThreadExecutor.getInstance());
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(receiver);
+    private void downloadImage(String photoURL, String fileName, String folderName) {
+        Intent intent = new Intent(SinglePhotoViewActivity.this, DownloadService.class);
+        intent.putExtra("file_url", photoURL);
+        intent.putExtra("file_name", fileName);
+        intent.putExtra("folder_name", folderName);
+        startService(intent);
     }
 
 }
