@@ -136,7 +136,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         }
     }
 
-    private static void downloadImage(final Context context, String folderName, String photoURL) {
+    public static void downloadImage(final Context context, String folderName, String photoURL) {
         File appDir = new File(Environment.getExternalStorageDirectory(), folderName);
         if (!appDir.exists()) {
             appDir.mkdir();
