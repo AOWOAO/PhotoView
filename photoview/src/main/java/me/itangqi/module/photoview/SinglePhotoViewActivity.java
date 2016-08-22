@@ -2,12 +2,12 @@ package me.itangqi.module.photoview;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,18 +16,26 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.facebook.common.executors.CallerThreadExecutor;
+import com.facebook.common.references.CloseableReference;
+import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
+import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.image.ImageInfo;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
-import me.relex.photodraweeview.OnPhotoTapListener;
 import me.relex.photodraweeview.OnViewTapListener;
 import me.relex.photodraweeview.PhotoDraweeView;
 
@@ -39,8 +47,8 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
     private static String mPhotoURL;
     private static String mFolderName;
-    private long mDownloadReference;
     private BroadcastReceiver receiver;
+    private static final String ACTION_DOWNLOAD_COMPLETE = "0x123";
 
     public static void startSinglePhotoView(Activity activity, String photoURL, String folderName) {
         mPhotoURL = photoURL;
@@ -88,14 +96,11 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
             }
         });
 
-        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        IntentFilter filter = new IntentFilter(ACTION_DOWNLOAD_COMPLETE);
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                long reference = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                if (mDownloadReference == reference) {
-                    Toast.makeText(SinglePhotoViewActivity.this, R.string.photo_view_download_success, Toast.LENGTH_LONG).show();
-                }
+                Toast.makeText(SinglePhotoViewActivity.this, R.string.photo_view_download_success, Toast.LENGTH_SHORT).show();
             }
         };
         registerReceiver(receiver, filter);
@@ -106,7 +111,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
                 PackageManager.PERMISSION_DENIED)) {
             PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
         } else {
-            downloadImageUseDownloadManager();
+            downloadImage(this, mFolderName, mPhotoURL);
         }
     }
 
@@ -117,7 +122,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
             // TODO
         } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            downloadImageUseDownloadManager();
+            downloadImage(this, mFolderName, mPhotoURL);
         }
     }
 
@@ -125,19 +130,57 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            downloadImageUseDownloadManager();
+            downloadImage(this, mFolderName, mPhotoURL);
         } else {
             Toast.makeText(getApplicationContext(), R.string.photo_view_permission_denied, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void downloadImageUseDownloadManager() {
-        DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        Uri uri = Uri.parse(mPhotoURL);
-        DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setDestinationInExternalPublicDir(mFolderName, System.currentTimeMillis() + ".jpg");
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        mDownloadReference = downloadManager.enqueue(request);
+    private static void downloadImage(final Context context, String folderName, String photoURL) {
+        File appDir = new File(Environment.getExternalStorageDirectory(), folderName);
+        if (!appDir.exists()) {
+            appDir.mkdir();
+        }
+        String fileName = System.currentTimeMillis() + ".jpg";
+        final File file = new File(appDir, fileName);
+        // To get image using Fresco
+        ImageRequest imageRequest = ImageRequestBuilder
+                .newBuilderWithSource(Uri.parse(photoURL))
+                .setProgressiveRenderingEnabled(true)
+                .build();
+
+        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+        DataSource<CloseableReference<CloseableImage>> dataSource =
+                imagePipeline.fetchDecodedImage(imageRequest, context);
+
+        dataSource.subscribe(new BaseBitmapDataSubscriber() {
+
+            @Override
+            protected void onNewResultImpl(Bitmap bitmap) {
+                try {
+                    FileOutputStream outputStream = new FileOutputStream(file);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                    outputStream.flush();
+                    outputStream.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                // 下载完成更新
+                Intent completedIntent = new Intent(ACTION_DOWNLOAD_COMPLETE);
+                context.sendBroadcast(completedIntent);
+                // 通知图库更新
+                Intent scannerIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file));
+                context.sendBroadcast(scannerIntent);
+            }
+
+            @Override
+            public void onFailureImpl(DataSource dataSource) {
+                // No cleanup required here.
+            }
+
+        }, CallerThreadExecutor.getInstance());
+
     }
 
     @Override
