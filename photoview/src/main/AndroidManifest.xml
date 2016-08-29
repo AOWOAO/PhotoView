@@ -9,6 +9,7 @@
         android:name=".PhotoViewApp"
         android:allowBackup="true"
         android:label="@string/app_name"
+        android:hardwareAccelerated="false"
         android:supportsRtl="true">
         <activity
             android:name=".PagerPhotoViewActivity"
