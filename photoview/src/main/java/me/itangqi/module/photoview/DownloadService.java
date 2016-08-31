@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Looper;
 import android.widget.Toast;
@@ -63,7 +64,7 @@ public class DownloadService extends IntentService {
     }
 
     private void download() {
-        File file;
+        final File file;
         InputStream is = null;
         BufferedInputStream bis = null;
         FileOutputStream fos = null;
@@ -98,7 +99,8 @@ public class DownloadService extends IntentService {
                     @Override
                     public void run() {
                         Looper.prepare();
-                        Toast.makeText(DownloadService.this, "保存成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DownloadService.this, "成功保存到 " + mFolderName + " 文件夹", Toast.LENGTH_SHORT).show();
+                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
                         Looper.loop();
                     }
                 }).start();
