@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
                         "http://img.cxdq.com/d1/img/081115/2008111514278263.jpg",
                         "http://img01.sogoucdn.com/app/a/100540002/856602.jpg"));
                 // 跳转 Pager view
-                PagerPhotoViewActivity.startPagerPhotoView(MainActivity.this, photoViewURLArrayList, "PhotoView");
+                PagerPhotoViewActivity.startPagerPhotoView(MainActivity.this, photoViewURLArrayList, 2, "PhotoView");
             }
         });
     }

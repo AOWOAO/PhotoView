@@ -2,17 +2,11 @@ package me.itangqi.module.photoview;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,31 +14,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.facebook.binaryresource.BinaryResource;
-import com.facebook.binaryresource.FileBinaryResource;
-import com.facebook.cache.common.CacheKey;
-import com.facebook.common.executors.CallerThreadExecutor;
-import com.facebook.common.references.CloseableReference;
-import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.imageformat.ImageFormat;
-import com.facebook.imageformat.ImageFormatChecker;
-import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
-import com.facebook.imagepipeline.core.ImagePipeline;
-import com.facebook.imagepipeline.core.ImagePipelineFactory;
-import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
-import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.image.ImageInfo;
-import com.facebook.imagepipeline.request.ImageRequest;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 import me.relex.photodraweeview.OnViewTapListener;
 import me.relex.photodraweeview.PhotoDraweeView;
@@ -55,16 +28,15 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
-    private static String mPhotoURL;
-    private static String mFileName;
-    private static String mFolderName;
-
+    private String mPhotoURL;
+    private String mFileName;
+    private String mFolderName;
 
     public static void startSinglePhotoView(Activity activity, String photoURL, String fileName, String folderName) {
-        mPhotoURL = photoURL;
-        mFileName = fileName;
-        mFolderName = folderName;
         Intent intent = new Intent(activity, SinglePhotoViewActivity.class);
+        intent.putExtra("photoURL", photoURL);
+        intent.putExtra("fileName", fileName);
+        intent.putExtra("folderName", folderName);
         activity.startActivity(intent);
         activity.overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
@@ -73,7 +45,13 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_photo_view);
-
+        mPhotoURL = getIntent().getStringExtra("photoURL");
+        if (mPhotoURL == null || mPhotoURL.isEmpty()) {
+            Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mFileName = getIntent().getStringExtra("fileName");
+        mFolderName = getIntent().getStringExtra("folderName");
         mPhotoDraweeView = (PhotoDraweeView) findViewById(R.id.photo_drawee_view);
         mPhotoDraweeView.setMaximumScale(MAXIMUM_SCALE);
         PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
