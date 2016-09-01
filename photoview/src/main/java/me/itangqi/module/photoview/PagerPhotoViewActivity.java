@@ -27,18 +27,17 @@ import me.relex.circleindicator.CircleIndicator;
 import me.relex.photodraweeview.PhotoDraweeView;
 
 public class PagerPhotoViewActivity extends AppCompatActivity {
-    private ArrayList<String> mPhotoList;
-    private String mFolderName;
-    private String mPhotoURL;
-    private int mPosition;
+    private ArrayList<String> mFileList;
+    private String mFilePath;
+    private String mFileURL;
     private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
 
-    public static void startPagerPhotoView(Context context, ArrayList<String> arrayList, int position, String folderName) {
+    public static void startPagerPhotoView(Context context, ArrayList<String> arrayList, int position, String filePath) {
         Intent intent = new Intent(context, PagerPhotoViewActivity.class);
         intent.putStringArrayListExtra("arrayList", arrayList);
-        intent.putExtra("folderName", folderName);
+        intent.putExtra("filePath", filePath);
         intent.putExtra("position", position);
         context.startActivity(intent);
     }
@@ -47,13 +46,13 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pager_photo_view);
-        mPhotoList = getIntent().getStringArrayListExtra("arrayList");
-        if (mPhotoList == null || mPhotoList.isEmpty()) {
+        mFileList = getIntent().getStringArrayListExtra("arrayList");
+        if (mFileList == null || mFileList.isEmpty()) {
             Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
             return;
         }
-        mFolderName = getIntent().getStringExtra("folderName");
-        mPosition = getIntent().getIntExtra("position", 0);
+        mFilePath = getIntent().getStringExtra("filePath");
+        int mPosition = getIntent().getIntExtra("position", 0);
         // 初始化小圆点
         CircleIndicator indicator = (CircleIndicator) findViewById(R.id.indicator);
         final MultiTouchViewPager viewPager = (MultiTouchViewPager) findViewById(R.id.view_pager);
@@ -65,9 +64,9 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
         mImageViewSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPhotoURL = mPhotoList.get(viewPager.getCurrentItem());
+                mFileURL = mFileList.get(viewPager.getCurrentItem());
                 // 默认都是 .jpg
-                startDownloadImage(mPhotoURL, mFolderName);
+                startDownloadImage(mFileURL, mFilePath);
             }
         });
     }
@@ -76,7 +75,7 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return mPhotoList.size();
+            return mFileList.size();
         }
 
         @Override
@@ -93,7 +92,7 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
         public Object instantiateItem(ViewGroup viewGroup, int position) {
             final PhotoDraweeView photoDraweeView = new PhotoDraweeView(viewGroup.getContext());
             PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
-            controller.setUri(Uri.parse(mPhotoList.get(position)));
+            controller.setUri(Uri.parse(mFileList.get(position)));
             controller.setOldController(photoDraweeView.getController());
             controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
                 @Override
@@ -134,7 +133,7 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
             // TODO
         } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            downloadImage(mPhotoURL, mFolderName);
+            downloadImage(mFileURL, mFilePath);
         }
     }
 
@@ -142,17 +141,17 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            downloadImage(mPhotoURL, mFolderName);
+            downloadImage(mFileURL, mFilePath);
         } else {
             Toast.makeText(getApplicationContext(), R.string.photo_view_permission_denied, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void downloadImage(String photoURL, String folderName) {
+    private void downloadImage(String fileURL, String filePath) {
         Intent intent = new Intent(PagerPhotoViewActivity.this, DownloadService.class);
-        intent.putExtra("file_url", photoURL);
+        intent.putExtra("file_url", fileURL);
         intent.putExtra("file_name", System.currentTimeMillis() + ".jpg");
-        intent.putExtra("folder_name", folderName);
+        intent.putExtra("file_path", filePath);
         startService(intent);
     }
 

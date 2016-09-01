@@ -28,15 +28,15 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
     private static final int REQUEST_CODE = 0; // 请求码
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
-    private String mPhotoURL;
+    private String mFileURL;
     private String mFileName;
-    private String mFolderName;
+    private String mFilePath;
 
-    public static void startSinglePhotoView(Activity activity, String photoURL, String fileName, String folderName) {
+    public static void startSinglePhotoView(Activity activity, String fileURL, String fileName, String filePath) {
         Intent intent = new Intent(activity, SinglePhotoViewActivity.class);
-        intent.putExtra("photoURL", photoURL);
+        intent.putExtra("fileURL", fileURL);
         intent.putExtra("fileName", fileName);
-        intent.putExtra("folderName", folderName);
+        intent.putExtra("filePath", filePath);
         activity.startActivity(intent);
         activity.overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
@@ -45,17 +45,17 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_photo_view);
-        mPhotoURL = getIntent().getStringExtra("photoURL");
-        if (mPhotoURL == null || mPhotoURL.isEmpty()) {
+        mFileURL = getIntent().getStringExtra("fileURL");
+        if (mFileURL == null || mFileURL.isEmpty()) {
             Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
             return;
         }
         mFileName = getIntent().getStringExtra("fileName");
-        mFolderName = getIntent().getStringExtra("folderName");
+        mFilePath = getIntent().getStringExtra("filePath");
         mPhotoDraweeView = (PhotoDraweeView) findViewById(R.id.photo_drawee_view);
         mPhotoDraweeView.setMaximumScale(MAXIMUM_SCALE);
         PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
-        controller.setUri(Uri.parse(mPhotoURL));
+        controller.setUri(Uri.parse(mFileURL));
         controller.setOldController(mPhotoDraweeView.getController());
         controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
             @Override
@@ -81,17 +81,17 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         mImageViewSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startDownloadImage(mPhotoURL, mFileName, mFolderName);
+                startDownloadImage(mFileURL, mFileName, mFilePath);
             }
         });
     }
 
-    private void startDownloadImage(String photoURL, String fileName, String folderName) {
+    private void startDownloadImage(String fileURL, String fileName, String filePath) {
         if ((ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_DENIED)) {
             PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
         } else {
-            downloadImage(photoURL, fileName, folderName);
+            downloadImage(fileURL, fileName, filePath);
         }
     }
 
@@ -102,7 +102,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
             // TODO
         } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            downloadImage(mPhotoURL, mFileName, mFolderName);
+            downloadImage(mFileURL, mFileName, mFilePath);
         }
     }
 
@@ -110,17 +110,17 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            downloadImage(mPhotoURL, mFileName, mFolderName);
+            downloadImage(mFileURL, mFileName, mFilePath);
         } else {
             Toast.makeText(getApplicationContext(), R.string.photo_view_permission_denied, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void downloadImage(String photoURL, String fileName, String folderName) {
+    private void downloadImage(String fileURL, String fileName, String filePath) {
         Intent intent = new Intent(SinglePhotoViewActivity.this, DownloadService.class);
-        intent.putExtra("file_url", photoURL);
+        intent.putExtra("file_url", fileURL);
         intent.putExtra("file_name", fileName);
-        intent.putExtra("folder_name", folderName);
+        intent.putExtra("file_path", filePath);
         startService(intent);
     }
 

@@ -32,7 +32,7 @@ public class DownloadService extends IntentService {
 
     private String mURLStr = null;
     private String mFileName = null;
-    private String mFolderName = null;
+    private String mFilePath = null;
     private int hasDown;
     private int size;
     private boolean isError = false;
@@ -59,7 +59,7 @@ public class DownloadService extends IntentService {
                 .setOngoing(true);
         mURLStr = intent.getStringExtra("file_url");
         mFileName = intent.getStringExtra("file_name");
-        mFolderName = intent.getStringExtra("folder_name");
+        mFilePath = intent.getStringExtra("file_path");
         download();
     }
 
@@ -81,9 +81,9 @@ public class DownloadService extends IntentService {
                 size = connection.getContentLength();
                 is = connection.getInputStream();
                 bis = new BufferedInputStream(is);
-                File dir = new File(Environment.getExternalStorageDirectory() + File.separator + mFolderName);
+                File dir = new File(Environment.getExternalStorageDirectory() + File.separator + "Huaban" + File.separator + mFilePath);
                 if (!dir.exists()) {
-                    dir.mkdir();
+                    dir.mkdirs();
                 }
                 file = new File(dir, mFileName);
                 fos = new FileOutputStream(file);
@@ -99,8 +99,12 @@ public class DownloadService extends IntentService {
                     @Override
                     public void run() {
                         Looper.prepare();
-                        Toast.makeText(DownloadService.this, "成功保存到 " + mFolderName + " 文件夹", Toast.LENGTH_SHORT).show();
-                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+                        if (mFilePath.equals("Pins")) {
+                            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+                            Toast.makeText(DownloadService.this, "成功保存到 Huaban/" + mFilePath + " 文件夹", Toast.LENGTH_SHORT).show();
+                        } else if (mFilePath.equals("Apps")){
+                            installApk(Uri.fromFile(file));
+                        }
                         Looper.loop();
                     }
                 }).start();
@@ -156,6 +160,14 @@ public class DownloadService extends IntentService {
         };
         Timer timer = new Timer();
         timer.schedule(task, 0, 100);
+    }
+
+    private void installApk(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, "application/vnd.android.package-archive");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        this.stopSelf();
     }
 
 }
