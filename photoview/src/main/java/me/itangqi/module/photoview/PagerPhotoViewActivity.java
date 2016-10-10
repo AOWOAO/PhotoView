@@ -66,7 +66,8 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
             public void onClick(View view) {
                 mFileURL = mFileList.get(viewPager.getCurrentItem());
                 // 默认都是 .jpg
-                startDownloadImage(mFileURL, mFilePath);
+                PermissionsActivity.startActivity(PagerPhotoViewActivity.this, mFileURL, System.currentTimeMillis() + ".jpg", mFilePath, WRITE_EXTERNAL_STORAGE);
+
             }
         });
     }
@@ -115,44 +116,6 @@ public class PagerPhotoViewActivity extends AppCompatActivity {
 
             return photoDraweeView;
         }
-    }
-
-    private void startDownloadImage(String photoURL, String folderName) {
-        if ((ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) ==
-                PackageManager.PERMISSION_DENIED)) {
-            PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
-        } else {
-            downloadImage(photoURL, folderName);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // 拒绝时相应处理
-        if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
-            // TODO
-        } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            downloadImage(mFileURL, mFilePath);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            downloadImage(mFileURL, mFilePath);
-        } else {
-            Toast.makeText(getApplicationContext(), R.string.photo_view_permission_denied, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void downloadImage(String fileURL, String filePath) {
-        Intent intent = new Intent(PagerPhotoViewActivity.this, DownloadService.class);
-        intent.putExtra("file_url", fileURL);
-        intent.putExtra("file_name", System.currentTimeMillis() + ".jpg");
-        intent.putExtra("file_path", filePath);
-        startService(intent);
     }
 
 }

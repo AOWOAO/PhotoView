@@ -8,7 +8,7 @@
     </style>
 
 
-    <style name="Transparent" parent="Theme.AppCompat.NoActionBar">
+    <style name="Transparent" parent="AppTheme">
         <item name="android:windowIsTranslucent">true</item><!-- 半透明 -->
         <item name="android:windowNoTitle">true</item><!-- 无标题 -->
         <item name="android:backgroundDimAmount">0.8</item><!-- 灰度 -->
@@ -16,6 +16,15 @@
         <item name="android:colorBackgroundCacheHint">@null</item><!-- 背景缓存颜色 -->
         <item name="android:backgroundDimEnabled">true</item><!-- 模糊 -->
         <!--<item name="android:windowAnimationStyle">@style/photoViewAnim</item>&lt;!&ndash; 弹出或者进入时的动画效果 &ndash;&gt;-->
+    </style>
+
+    <style name="PermissionTransparent" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
 </resources>

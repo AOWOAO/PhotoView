@@ -25,15 +25,24 @@ public class PermissionsActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 0; // 系统权限管理页面的参数
     private static final String EXTRA_PERMISSIONS = "me.itangqi.android.extra_permission"; // 权限参数
     private static final String PACKAGE_URL_SCHEME = "package:"; // 方案
+    private static final String EXTRA_FILE_URL = "fileURL";
+    private static final String EXTRA_FILE_NAME = "fileName";
+    private static final String EXTRA_FILE_PATH = "filePath";
 
     private PermissionsChecker mChecker; // 权限检测器
     private boolean isRequiredCheck; // 是否需要系统权限检测
+    private String mFileURL;
+    private String mFileName;
+    private String mFilePath;
 
     // 启动当前权限页面的公开接口
-    static void startActivityForResult(Activity activity, int requestCode, String... permissions) {
+    public static void startActivity(Activity activity, String fileURL, String fileName, String filePath, String... permissions) {
         Intent intent = new Intent(activity, PermissionsActivity.class);
+        intent.putExtra(EXTRA_FILE_URL, fileURL);
+        intent.putExtra(EXTRA_FILE_NAME, fileName);
+        intent.putExtra(EXTRA_FILE_PATH, filePath);
         intent.putExtra(EXTRA_PERMISSIONS, permissions);
-        ActivityCompat.startActivityForResult(activity, intent, requestCode, null);
+        activity.startActivity(intent);
     }
 
     @Override
@@ -42,9 +51,11 @@ public class PermissionsActivity extends AppCompatActivity {
         if (getIntent() == null || !getIntent().hasExtra(EXTRA_PERMISSIONS)) {
             throw new RuntimeException("PermissionsActivity 需要使用静态 startActivityForResult 方法启动!");
         }
-        setContentView(R.layout.activity_main);
         mChecker = new PermissionsChecker(this);
         isRequiredCheck = true;
+        mFileURL = getIntent().getStringExtra(EXTRA_FILE_URL);
+        mFileName = getIntent().getStringExtra(EXTRA_FILE_NAME);
+        mFilePath = getIntent().getStringExtra(EXTRA_FILE_PATH);
     }
 
     @Override
@@ -75,6 +86,7 @@ public class PermissionsActivity extends AppCompatActivity {
     // 全部权限均已获取
     private void allPermissionsGranted() {
         setResult(PERMISSIONS_GRANTED);
+        downloadImage(mFileURL, mFileName, mFilePath);
         finish();
     }
 
@@ -137,6 +149,14 @@ public class PermissionsActivity extends AppCompatActivity {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse(PACKAGE_URL_SCHEME + getPackageName()));
         startActivity(intent);
+    }
+
+    private void downloadImage(String fileURL, String fileName, String filePath) {
+        Intent intent = new Intent(this, DownloadService.class);
+        intent.putExtra("file_url", fileURL);
+        intent.putExtra("file_name", fileName);
+        intent.putExtra("file_path", filePath);
+        startService(intent);
     }
 }
 

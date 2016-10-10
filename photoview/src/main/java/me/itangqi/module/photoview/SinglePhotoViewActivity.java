@@ -24,10 +24,9 @@ import me.relex.photodraweeview.PhotoDraweeView;
 
 public class SinglePhotoViewActivity extends AppCompatActivity {
 
-    private PhotoDraweeView mPhotoDraweeView;
     private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
-    private static final int REQUEST_CODE = 0; // 请求码
-    private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权限
+    private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权
+    private PhotoDraweeView mPhotoDraweeView;
     private String mFileURL;
     private String mFileName;
     private String mFilePath;
@@ -81,47 +80,9 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         mImageViewSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startDownloadImage(mFileURL, mFileName, mFilePath);
+                PermissionsActivity.startActivity(SinglePhotoViewActivity.this, mFileURL, mFileName, mFilePath, WRITE_EXTERNAL_STORAGE);
             }
         });
-    }
-
-    private void startDownloadImage(String fileURL, String fileName, String filePath) {
-        if ((ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) ==
-                PackageManager.PERMISSION_DENIED)) {
-            PermissionsActivity.startActivityForResult(this, REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
-        } else {
-            downloadImage(fileURL, fileName, filePath);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // 拒绝时相应处理
-        if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
-            // TODO
-        } else if (requestCode == REQUEST_CODE && resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            downloadImage(mFileURL, mFileName, mFilePath);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            downloadImage(mFileURL, mFileName, mFilePath);
-        } else {
-            Toast.makeText(getApplicationContext(), R.string.photo_view_permission_denied, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void downloadImage(String fileURL, String fileName, String filePath) {
-        Intent intent = new Intent(SinglePhotoViewActivity.this, DownloadService.class);
-        intent.putExtra("file_url", fileURL);
-        intent.putExtra("file_name", fileName);
-        intent.putExtra("file_path", filePath);
-        startService(intent);
     }
 
 }

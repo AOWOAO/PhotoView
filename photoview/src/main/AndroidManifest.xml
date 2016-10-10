@@ -19,7 +19,7 @@
             android:theme="@style/Transparent"/>
         <activity
             android:name=".PermissionsActivity"
-            android:theme="@style/Transparent"/>
+            android:theme="@style/PermissionTransparent"/>
         <service android:name=".DownloadService"/>
 
     </application>
