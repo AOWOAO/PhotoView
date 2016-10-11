@@ -12,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -27,6 +28,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     private static final float MAXIMUM_SCALE = 5.0f; // 最大缩放比
     private static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE; // 所需的权
     private PhotoDraweeView mPhotoDraweeView;
+    private ProgressBar mProgressBar;
     private String mFileURL;
     private String mFileName;
     private String mFilePath;
@@ -44,6 +46,8 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_photo_view);
+        mProgressBar = (ProgressBar)findViewById(R.id.progressBar);
+        mProgressBar.setVisibility(View.VISIBLE);
         mFileURL = getIntent().getStringExtra("fileURL");
         if (mFileURL == null || mFileURL.isEmpty()) {
             Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
@@ -64,6 +68,7 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
                     return;
                 }
                 mPhotoDraweeView.update(imageInfo.getWidth(), imageInfo.getHeight());
+                mProgressBar.setVisibility(View.GONE);
             }
         });
         mPhotoDraweeView.setController(controller.build());

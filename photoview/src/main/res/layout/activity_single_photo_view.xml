@@ -4,6 +4,14 @@
              android:layout_height="match_parent"
              android:clickable="true">
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
     <me.relex.photodraweeview.PhotoDraweeView
         android:id="@+id/photo_drawee_view"
         android:layout_width="match_parent"

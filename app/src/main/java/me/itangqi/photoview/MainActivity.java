@@ -22,8 +22,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String fileURL = "http://img2.yytcdn.com/artist/fan/150812/0/-M-0e9a280baa1d87f73e7d91db57cffa22_0x0.jpg";
+                String largeFileURL = "http://img.hb.aicdn.com/0235c87b656cbaa6e79c51139538d3e3c891c80117e13b-GKMsYh_fw658";
                 // 跳转 Single view
-                SinglePhotoViewActivity.startSinglePhotoView(MainActivity.this, fileURL, System.currentTimeMillis() + ".jpg", "Pins");
+                SinglePhotoViewActivity.startSinglePhotoView(MainActivity.this, largeFileURL, System.currentTimeMillis() + ".jpg", "Pins");
             }
         });
         mBtnViewPager.setOnClickListener(new View.OnClickListener() {
