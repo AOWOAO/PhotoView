@@ -19,6 +19,8 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.imagepipeline.image.ImageInfo;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import me.relex.photodraweeview.OnViewTapListener;
 import me.relex.photodraweeview.PhotoDraweeView;
@@ -57,8 +59,12 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
         mFilePath = getIntent().getStringExtra("filePath");
         mPhotoDraweeView = (PhotoDraweeView) findViewById(R.id.photo_drawee_view);
         mPhotoDraweeView.setMaximumScale(MAXIMUM_SCALE);
+        ImageRequest request = ImageRequestBuilder
+                .newBuilderWithSource(Uri.parse(mFileURL))
+                .setProgressiveRenderingEnabled(true)
+                .build();
         PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
-        controller.setUri(Uri.parse(mFileURL));
+        controller.setImageRequest(request);
         controller.setOldController(mPhotoDraweeView.getController());
         controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
             @Override
