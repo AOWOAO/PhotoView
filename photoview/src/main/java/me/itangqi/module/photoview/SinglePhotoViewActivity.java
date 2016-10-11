@@ -76,6 +76,13 @@ public class SinglePhotoViewActivity extends AppCompatActivity {
                 mPhotoDraweeView.update(imageInfo.getWidth(), imageInfo.getHeight());
                 mProgressBar.setVisibility(View.GONE);
             }
+
+            @Override
+            public void onFailure(String id, Throwable throwable) {
+                super.onFailure(id, throwable);
+                mProgressBar.setVisibility(View.GONE);
+                finish();
+            }
         });
         mPhotoDraweeView.setController(controller.build());
         mPhotoDraweeView.setOnViewTapListener(new OnViewTapListener() {
